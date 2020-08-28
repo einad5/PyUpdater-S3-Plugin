@@ -102,6 +102,15 @@ class S3Uploader(BaseUploader):
         if self.bucket_region is None:
             self.bucket_region = 'us-west-2'
 
+        print("getting endpoint url")
+        print(config)
+
+        self.endpoint_url = os.environ.get(u'PYU_ENDPOINT_URL')
+        endpoint_url = config.get(u'endpoint_url')
+        if endpoint_url is not None:
+            print(endpoint_url)
+            self.endpoint_url = endpoint_url
+
         self._connect()
 
     def _connect(self):
@@ -111,7 +120,11 @@ class S3Uploader(BaseUploader):
             aws_session_token=self.session_token,
             region_name=self.bucket_region
         )
-        self.s3 = session.client('s3')
+        if self.endpoint_url is not None:
+            print("endpoint: "+self.endpoint_url)
+            self.s3 = session.client('s3', endpoint_url=self.endpoint_url)
+        else:
+            self.s3 = session.client('s3')
 
     def set_config(self, config):
         bucket_name = config.get('bucket_name')
@@ -134,6 +147,13 @@ class S3Uploader(BaseUploader):
             default=bucket_region
         )
         config['bucket_region'] = bucket_region
+
+        endpoint_url = config.get('endpoint_url')
+        endpoint_url = self.get_answer(
+            'Please enter a endpoint url',
+            default=endpoint_url
+        )
+        config['endpoint_url'] = endpoint_url
 
     def upload_file(self, filename):
         """Uploads a single file to S3

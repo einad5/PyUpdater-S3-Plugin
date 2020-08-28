@@ -11,3 +11,4 @@ PyUpdater_s3_Plugin.egg-info/*
 .idea
 
 .DS_Store
+/venv/
